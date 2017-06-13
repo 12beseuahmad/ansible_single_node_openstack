@@ -1,0 +1,84 @@
+---
+
+- name: Installing And Configuring Controller Node
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Copying Sql Script For Nova
+    template: src=templates/nova.sql.j2 dest=~/nova.sql
+
+  - name: Setting Permissions
+    file:
+      path: ~/nova.sql
+      owner: root
+      group: root
+      mode: 0775
+
+  - name: Create nova  Databases and Grant Priviliges
+    raw: mysql --host=localhost --user=root --password={{MySQL_root_pass}} < ~/nova.sql
+
+  - name: Creating Nova User
+    shell: . ~/admin-openrc && openstack user create --domain default --password {{password}} nova
+
+  - name: Adding Admin Role To Nova
+    shell: . ~/admin-openrc && openstack role add --project service --user nova admin
+
+  - name: Creating Nova Service Entity
+    shell: . ~/admin-openrc && openstack service create --name nova --description "OpenStack Compute" compute
+
+  - name: Creating Endpoints for public 
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne compute public http://{{controller}}:8774/v2.1/%\(tenant_id\)s
+
+  - name: Creating Endpoints for internal
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne compute internal http://{{controller}}:8774/v2.1/%\(tenant_id\)s
+
+  - name: Creating Endpoints for admin
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne compute admin http://{{controller}}:8774/v2.1/%\(tenant_id\)s
+
+  - name: Installing The Packages
+    shell: apt-get -y  install nova-api nova-conductor nova-consoleauth nova-novncproxy nova-scheduler
+
+  - name: Configuring Nova
+    template: src=templates/nova_controller.conf.j2 dest=/etc/nova/nova.conf
+
+  - name: Populate Compute manage api database
+    shell: /bin/sh -c "nova-manage api_db sync" nova
+
+  - name: populate nova manage database
+    shell: /bin/sh -c "nova-manage db sync" nova
+
+  - name: Restarting nova api
+    service:
+      name: nova-api
+      state: restarted
+
+
+  - name: Restarting nova condoleauth
+    service:
+      name: nova-consoleauth
+      state: restarted
+
+
+  - name: Restarting nova schedular
+    service:
+      name: nova-scheduler
+      state: restarted
+
+
+  - name: Restarting nova conductor
+    service:
+      name: nova-conductor
+      state: restarted
+
+
+
+  - name: Restarting nova no vnc proxy
+    service:
+      name: nova-novncproxy
+      state: restarted
+
+
+

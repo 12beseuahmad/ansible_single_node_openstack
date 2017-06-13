@@ -1,0 +1,37 @@
+---
+
+- name: Installing And Configuring Compute Node
+  hosts: all
+  remote_user: root
+  vars_files: 
+  - variable.yml
+  tasks:
+
+  - name: Installing Compute Node
+    shell: apt-get -y install nova-compute
+
+  - name: Configuring Nova compute
+    template: src=templates/nova_compute.conf.j2 dest=/etc/nova/nova.conf
+
+  - name: Checking if Compute node supports the Hardware
+    command: egrep -c '(vmx|svm)' /proc/cpuinfo
+    register: support
+    ignore_errors: true
+
+  - name: If Hardware not supported then Configuring libvirt 
+    lineinfile: 
+       dest: /etc/nova/nova-compute.conf
+       insertafter: '[libvirt]'
+       line: 'virt_type = qemu'
+    when: support.stdout == "0"
+
+  - name: Restarting nova compute service
+    service:
+      name: nova-compute
+      state: restarted
+
+  - name: Verifying Compute Service 
+    shell: . ~/admin-openrc && openstack compute service list
+
+
+...

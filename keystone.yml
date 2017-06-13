@@ -1,0 +1,59 @@
+---
+
+- name: KeyStone Installation and Configuration
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Copying Sql Script For Keystone
+    template: src=templates/keystone.sql.j2 dest=~/keystone.sql
+
+  - name: Setting Permissions
+    file:
+      path: ~/keystone.sql
+      owner: root
+      group: root
+      mode: 0775
+  
+  - name: Create Keystone Database and Grant Priviliges
+    raw: mysql --host=localhost --user=root --password={{MySQL_root_pass}} < ~/keystone.sql
+
+  - name: Disabling Keystone Services To Start Automatically
+    raw: echo "manual" > /etc/init/keystone.override
+
+  - name: Install Keystone Packages
+    raw: apt-get -y install keystone apache2 libapache2-mod-wsgi
+
+  - name: Removing Keystone Default Config File
+    raw: rm /etc/keystone/keystone.conf
+
+  - name: Configuring Keystone
+    template: src=templates/keystone.conf.j2 dest=/etc/keystone/keystone.conf
+
+  - name: Populating the identity Service Database
+    shell:  /bin/sh -c "keystone-manage db_sync" keystone
+
+  - name: Initialize fernet keys
+    shell: keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+
+  - name: Configuring Apache2.conf
+    lineinfile: dest=/etc/apache2/apache2.conf
+                insertbefore=BOF
+                line='ServerName {{controller}}\n'
+
+  - name: Configuring wsgi-keystone
+    template: src=templates/wsgi-keystone.conf.j2 dest=/etc/apache2/sites-available/wsgi-keystone.conf
+
+  - name: Enabling Identity Service Virtual Host
+    raw: ln -s /etc/apache2/sites-available/wsgi-keystone.conf /etc/apache2/sites-enabled
+
+  - name: Restarting Apache Service
+    raw: service apache2 restart
+
+  - name: Removing SQLlite file
+    raw: rm -f /var/lib/keystone/keystone.db 
+
+...
+

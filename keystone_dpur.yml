@@ -1,0 +1,62 @@
+---
+
+
+- name: Creating Domain, Project, Users and Roles
+  hosts: all
+  environment: "{{keystone_env}}"
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Creating Default Domain
+    command: openstack domain create --description "Default Domain" default
+
+  - name: Creating Admin Project
+    command: openstack project create --domain default --description "Admin Project" admin
+    
+  - name: Creating Admin User
+    expect:
+      command: openstack user create --domain default --password-prompt admin
+      responses:
+        'User Password:': "{{password}}"
+        'Repeat User Password:': "{{password}}"
+      echo: yes
+
+  - name: Creating Admin Role
+    command: openstack role create admin
+
+  - name: Adding Admin role to Admin project
+    command: openstack role add --project admin --user admin admin
+
+  - name: Creating Service Project
+    command: openstack project create --domain default --description "Service Project" service
+    
+  - name: Creating Demo Project
+    command: openstack project create --domain default --description "Demo Project" demo
+
+
+  - name: Creating Demo  User
+    expect:
+      command: openstack user create --domain default --password-prompt demo
+      responses:
+        'User Password:': "{{password}}"
+        'Repeat User Password:': "{{password}}"
+      echo: yes
+
+  - name: Creating user Role
+    command: openstack role create user
+
+  - name: Adding user role to demo project
+    command: openstack role add --project demo --user demo user
+
+  
+
+
+
+
+
+
+
+
+

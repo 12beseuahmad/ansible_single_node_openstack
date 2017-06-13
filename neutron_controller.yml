@@ -1,0 +1,47 @@
+---
+- name: Installing And Configuring Neutron Controller Node
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+
+  - name: Pushing Sql Script for neutron controller
+    template: src=templates/neutron.sql.j2 dest=~/neutron.sql
+
+  - name: Setting Permissions
+    file:
+      path: ~/neutron.sql
+      owner: root
+      group: root
+      mode: 0775
+
+  - name: Creating Neutron Databases and Grant Priviliges
+    raw: mysql --host=localhost --user=root --password={{MySQL_root_pass}} < ~/neutron.sql
+
+  - name: Creating Neutron User
+    shell: . ~/admin-openrc && openstack user create --domain default --password {{password}} neutron
+
+  - name: Adding Admin Role To Neutron User
+    shell: . ~/admin-openrc && openstack role add --project service --user neutron admin
+
+  - name: Creating Neutron Service entity
+    shell: . ~/admin-openrc &&  openstack service create --name neutron --description "OpenStack Networking" network
+    
+
+  - name: Creating Networking Service API endpoint public
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne network public http://{{controller}}:9696
+
+
+  - name: Creating Networking Service API endpoint internal
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne network internal http://{{controller}}:9696
+
+
+  - name: Creating Networking Service API endpoint admin
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne network admin http://{{controller}}:9696
+
+  
+
+
+...

@@ -1,0 +1,28 @@
+---
+
+
+- name: Configuring Glance 
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+
+  - name: Setting Glance.conf
+    template: src=templates/glance-api.conf.j2 dest=/etc/glance/glance-api.conf
+
+  - name: Setting Glance-registry.conf
+    template: src=templates/glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf
+
+  - name: Populating The Image Service Database
+    command: /bin/sh -c "glance-manage db_sync" glance
+
+  - name: Restart Glance Registry Service
+    shell: service glance-registry restart
+
+  
+  - name: Restart Glance Api  Service
+    shell: service glance-api restart
+
+...

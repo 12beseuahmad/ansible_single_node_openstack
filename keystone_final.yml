@@ -1,0 +1,19 @@
+---
+- name: Creating Openstack Client Environment Scripts
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+  
+
+  - name: Creating Admin Environment Script
+    template: src=templates/admin-openrc.j2 dest=~/admin-openrc
+
+  - name: Creating Demo Environment Script
+    template: src=templates/demo-openrc.j2 dest=~/demo-openrc
+
+  - name: Using The Script and issuing token
+    shell: . ~/admin-openrc && openstack token issue
+   
+...

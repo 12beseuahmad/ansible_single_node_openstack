@@ -1,0 +1,50 @@
+- name: Create Service Entity and API Endpoints
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Populating the identity Service Database
+    command:  /bin/sh -c "keystone-manage db_sync" keystone
+  
+  #- name: export first 
+   # shell: export OS_TOKEN=67eeb84da53dd915a02a
+
+  #- name: export second
+   # shell: export OS_URL=http://ubuntu:35357/v3
+
+  
+  #- name: export third
+   # shell: export OS_IDENTITY_API_VERSION=3
+
+
+  - name: Creating Identity Service
+    command: openstack service create --name keystone --description "OpenStack Identity" identity
+    environment:
+     OS_TOKEN: 67eeb84da53dd915a02a
+     OS_URL: http://ubuntu:35357/v3
+     OS_IDENTITY_API_VERSION: 3
+
+  - name: Creating Api Endpoint Public
+    command: openstack endpoint create --region RegionOne identity public http://{{controller}}:5000/v3
+    environment:
+     OS_TOKEN: 67eeb84da53dd915a02a
+     OS_URL: http://ubuntu:35357/v3
+     OS_IDENTITY_API_VERSION: 3
+
+  - name: Creating Api Endpoint internal
+    command: openstack endpoint create --region RegionOne identity internal http://{{controller}}:5000/v3
+    environment:
+     OS_TOKEN: 67eeb84da53dd915a02a
+     OS_URL: http://ubuntu:35357/v3
+     OS_IDENTITY_API_VERSION: 3
+    
+  - name: Creating Api Endpoint admin
+    command: openstack endpoint create --region RegionOne identity admin http://{{controller}}:35357/v3
+    environment:
+     OS_TOKEN: 67eeb84da53dd915a02a
+     OS_URL: http://ubuntu:35357/v3
+     OS_IDENTITY_API_VERSION: 3
+
+  

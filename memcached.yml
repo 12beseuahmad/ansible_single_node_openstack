@@ -1,0 +1,21 @@
+---
+- name: Installing And Configuring Memcached For Keystone
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+
+  tasks:
+
+  - name: Installing Memcached and Python Module
+    raw: apt-get -y install memcached python-memcache
+
+  - name: Configuring Memcache
+    replace:
+      dest: /etc/memcached.conf
+      regexp: '-l 127\.0\.0\.1'
+      replace: '-l {{remote_ip}}'
+
+  - name: Restart Memcached Service
+    raw: service memcached restart
+...

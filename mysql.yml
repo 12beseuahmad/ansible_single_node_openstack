@@ -1,0 +1,43 @@
+- name: To Install And Configure MySQL
+  hosts: all
+  user: root
+  vars_files:
+  - variable.yml
+
+  tasks:
+
+  - name: Set MySQL root password before installing
+    debconf: name='mysql-server' question='mysql-server/root_password' value='{{MySQL_root_pass | quote}}' vtype='password'
+
+  - name: Confirm MySQL root password before installing
+    debconf: name='mysql-server' question='mysql-server/root_password_again' value='{{MySQL_root_pass | quote}}' vtype='password'
+
+  - name: install mysql
+    raw: apt-get -y install mariadb-server python-pymysql
+
+  - name: Configuring mysql
+    template: src=templates/openstack.cnf.j2
+              dest=/etc/mysql/conf.d/openstack.cnf
+
+  - name: Restarting MySQL service
+    raw:  service mysql restart
+  
+  - name: Install PIP
+    raw: apt-get -y install python-pip
+
+  - name: Installing Pexpect python module
+    raw:  pip install pexpect
+
+  - name: Running Secure MySQL installation
+    expect:
+      chdir: /usr/bin
+      command: ./mysql_secure_installation
+      responses:
+        'Enter current password for root \(enter for none\):': 'ngnware'
+        'Change the root password\? \[Y\/n\] ': 'n'
+        'Remove anonymous users\? \[Y\/n\] ': 'y'
+        'Disallow root login remotely\? \[Y\/n\] ': 'y'
+        'Remove test database and access to it\? \[Y\/n\]': 'y'
+        'Reload privilege tables now\? \[Y\/n\] ': 'y'
+      echo: yes
+

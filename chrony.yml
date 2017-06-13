@@ -1,0 +1,17 @@
+---
+
+- name: Installing and Configuring Chrony
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Install Chrony
+    raw: apt-get -y install chrony
+
+  - name: Restart Chrony Service
+    raw: service chrony restart
+
+
+...

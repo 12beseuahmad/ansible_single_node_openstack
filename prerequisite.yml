@@ -1,0 +1,20 @@
+---
+- name: Installing The Required Packages
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Updating
+    raw: apt-get -y update
+
+  - name: upgrading 
+    raw: apt-get -y upgrade
+
+  - name: distro upgrade
+    raw: apt-get -y dist-upgrade
+
+  - name: installing git
+    raw: apt-get -y install git
+...

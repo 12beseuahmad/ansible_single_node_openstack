@@ -1,0 +1,48 @@
+---
+- name: Initiating Playbook For Deploying Openstack
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+#- include: prerequisite.yml
+
+#- include: chrony.yml
+
+#- include: openstack_packages.yml
+
+#- include: mysql.yml
+
+#- include: mongodb.yml
+
+#- include: rabbitmq.yml
+
+#- include: memcached.yml
+
+#- include: keystone.yml
+
+#- include: keystone1.yml
+
+#- include: keystone_dpur.yml
+
+#- include: keystone_verify.yml
+
+#- include: keystone_final.yml
+
+#- include: glance.yml
+
+#- include: glance_verify.yml
+
+#- include: compute_controller.yml
+
+#- include: compute.yml
+
+#- include: neutron_controller.yml
+
+#- include: config_self_serive_network.yml
+
+#- include: neutron_compute.yml
+
+- include: dashboard.yml
+...

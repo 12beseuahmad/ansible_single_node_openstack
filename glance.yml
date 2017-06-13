@@ -1,0 +1,91 @@
+---
+
+- name: Glance Installation and Configuration
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Copying Sql Script For Glance
+    template: src=templates/glance.sql.j2 dest=~/glance.sql
+
+  - name: Setting Permissions
+    file:
+      path: ~/glance.sql
+      owner: root
+      group: root
+      mode: 0775
+
+  - name: Creating Glance  Database and Grant Priviliges
+    raw: mysql --host=localhost --user=root --password={{MySQL_root_pass}} < ~/glance.sql
+
+
+  - name: Create Glance User
+    shell: . ~/admin-openrc &&  openstack user create --domain default --password {{password}}  glance
+     
+
+
+  - name: Add Admin Role to Glance User
+    shell: . ~/admin-openrc && openstack role add --project service --user glance admin
+
+  - name: Create glance Service Identity
+    shell: . ~/admin-openrc && openstack service create --name glance --description "OpenStack Image" image
+
+
+  - name: Create Image Service API Endpoint For Public
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne image public http://{{controller}}:9292
+
+
+  - name: Create Image Service API Endpoint For internal
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne image internal http://{{controller}}:9292
+
+  - name: Create Image Service API Endpoint For Admin
+    shell: . ~/admin-openrc && openstack endpoint create --region RegionOne image admin http://{{controller}}:9292
+
+
+  - name: Installing The Package 
+    raw: apt-get -y install glance
+
+  - name: Setting Glance.conf
+    template: src=templates/glance-api.conf.j2 dest=/etc/glance/glance-api.conf
+
+  - name: Setting Glance-registry.conf
+    template: src=templates/glance-registry.conf.j2 dest=/etc/glance/glance-registry.conf
+
+  - name: Populating The Image Service Database
+    command: /bin/sh -c "glance-manage db_sync" glance
+
+  - name: Restart Glance Registry Service
+    shell: service glance-registry restart
+
+
+  - name: Restart Glance Api  Service
+    shell: service glance-api restart
+
+...
+
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,4 @@
+
+
+
+IF Deploying on a VM then Qemo should be insert under Libvirt in Playbook name compute.yml

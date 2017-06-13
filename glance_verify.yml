@@ -1,0 +1,21 @@
+---
+
+- name: Verifying Keystone
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+
+  - name: Downloading Source Image
+    shell: . ~/admin-openrc && wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img
+
+
+  - name: Uploading image Service to Image Service 
+    shell: . ~/admin-openrc && openstack image create "cirros" --file cirros-0.3.4-x86_64-disk.img --disk-format qcow2 --container-format bare --public
+
+  - name: Verifying Upload
+    shell: . ~/admin-openrc && openstack image list
+
+...

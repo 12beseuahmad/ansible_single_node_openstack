@@ -1,0 +1,21 @@
+---
+- name: Installing Openstack Packages
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  
+  tasks:
+
+  - name: Enablling Openstack Repository
+    raw:  apt-get install software-properties-common
+
+  - name: Getting Repository
+    raw: add-apt-repository -y  cloud-archive:{{ repository }}
+
+  - name: Finalize The Installation
+    raw: apt-get -y update && apt-get -y  dist-upgrade
+
+  - name: Installing Openstack Client
+    raw: apt-get -y install python-openstackclient
+...

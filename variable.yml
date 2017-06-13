@@ -1,0 +1,15 @@
+---
+repository: mitaka
+MySQL_root_pass: ngnware
+remote_ip: 192.168.110.193
+password: ngnware
+token: 67eeb84da53dd915a02a
+controller: ubuntu
+
+keystone_env:
+     OS_TOKEN: "{{token}}"
+     OS_URL: http://{{controller}}:35357/v3
+     OS_IDENTITY_API_VERSION: 3
+
+...
+

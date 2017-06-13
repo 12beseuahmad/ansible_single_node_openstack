@@ -1,0 +1,31 @@
+---
+
+- name: Verifying Keystone
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+
+
+  - name: Disabling Temporary authentication Token Mechanism
+    template: src=templates/keystone-paste.ini.j2 dest=/etc/keystone/keystone-paste.ini
+
+  - name: Unsetting Temporary Token
+    shell: unset OS_TOKEN OS_URL
+
+  - name: Requesting an Authentication Token for Admin
+    expect:
+      command: openstack --os-auth-url http://{{controller}}:35357/v3  --os-project-domain-name default --os-user-domain-name default --os-project-name admin --os-username admin token issue
+      responses:
+         'Password:': "{{password}}"
+      echo: yes
+
+  - name: Requesting an Authentication Token for demo
+    expect:
+      command: openstack --os-auth-url http://{{controller}}:5000/v3 --os-project-domain-name default --os-user-domain-name default --os-project-name demo --os-username demo token issue
+      responses:
+         'Password:': "{{password}}"
+      echo: yes
+...

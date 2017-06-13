@@ -1,0 +1,39 @@
+---
+
+- name: Installing And Configuring Neutron Compute Node
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  - name: Installing The Components
+    raw: apt-get -y install neutron-linuxbridge-agent
+
+  - name: Configuring the common components
+    template: src=templates/neutron_compute.conf.j2 dest=/etc/neutron/neutron.conf
+
+  - name: Configuring Linux Bridge agent
+    template: src=templates/linuxbridge_agent_compute.ini.j2 dest=/etc/neutron/plugins/ml2/linuxbridge_agent.ini 
+
+  - name: Configuring Compute to use Networking 
+    template: src=templates/nova_neutron.conf.j2 dest=/etc/nova/nova.conf
+
+  - name: Restarting Compute Service 
+    service:
+      name: nova-compute
+      state: restarted
+  
+  - name: restarting neutron-linuxbridge-agent
+    service:
+      name: neutron-linuxbridge-agent
+      state: restarted
+
+  - name: Verifying Operations
+    shell: . ~/admin-openrc && neutron ext-list
+
+  - name: Verifying Network
+    shell: . ~/admin-openrc && neutron agent-list
+    
+...
+

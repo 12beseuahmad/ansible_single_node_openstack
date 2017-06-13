@@ -1,0 +1,29 @@
+- name: Installing and Configuring Chrony
+  hosts: all
+  remote_user: root
+  vars_files:
+  - variable.yml
+  tasks:
+
+  #- name: Running Secure MySQL installation
+   
+# expect:
+ #     chdir: /usr/bin
+  #    command: ./mysql_secure_installation
+   #   responses:
+    #    'Enter current password for root \(enter for none\):': 'ngnware'
+     #   'Change the root password\? \[Y\/n\] ': 'n'
+      #  'Remove anonymous users\? \[Y\/n\] ': 'y'
+       # 'Disallow root login remotely\? \[Y\/n\] ': 'y'
+        #'Remove test database and access to it\? \[Y\/n\]': 'y'
+        #'Reload privilege tables now\? \[Y\/n\] ': 'y'
+     # echo: yes
+ # - name: TEST LINE IN FILE 
+  #  lineinfile: dest=~/keystone.sql
+   #             insertbefore=BOF
+    #            line='Hello, {{controller}}\n'
+     #           state=present
+
+
+  - name: Printing Environment Variable
+    shell: echo $OS_TOKEN
